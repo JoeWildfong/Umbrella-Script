@@ -1,0 +1,66 @@
+#login-box {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+#start {
+  display: none;
+}
+
+body.name-valid.subsequence-valid #start {
+  display: initial;
+}
+
+#stop {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#current-color {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -5;
+}
+
+#next-color, #then-color {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  width: 50%;
+  height: 30%;
+  border: 1px solid black;
+  text-align: center;
+}
+
+#next-color {
+  left: 0;
+}
+#then-color {
+  right: 0;
+}
+
+body[data-frame=last] #next-color {
+  display: none !important;
+}
+
+body:not([data-frame=normal]) #then-color {
+  display: none !important;
+}
+
+body.started #login-box {
+  display: none;
+}
+
+body.started #current-color, body.started #next-color, body.started #then-color, body.started #stop {
+  display: initial;
+}
