@@ -4,7 +4,7 @@
   "description": "Displays individual scripts for an umbrella filming project in real time.",
   "display": "standalone",
   "scope": "/Umbrella-Script/",
-  "start_url": "/index.html",
+  "start_url": "index.html",
   "background_color": "#3E4EB8",
   "theme_color": "#2F3BA2",
   "icons": [{
