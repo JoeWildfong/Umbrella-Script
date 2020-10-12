@@ -1,11 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>Test Web App</title>
+    <meta name="description" content="An app to display scripts for umbrella filming projects.">
+    <meta name="theme-color" content="#a81f28">
+    <title>Umbrella Script</title>
     <link href="style.css" rel="stylesheet" type="text/css" />
     <link href="manifest.json" rel="manifest" />
+
+    <!-- iOS tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Umbrella Script">
+    <link rel="apple-touch-icon" href="/images/homepage152.png">
   </head>
   <body>
     <div id="current-color"></div>
@@ -13,6 +21,7 @@
     <div id="then-color">Then:</div>
     <div id="login-box">
       <span id="name-found"></span><br />
+      <label for="name">Name:</label>
       <input id="name" type="text" placeholder="Enter your name" /><br />
       <div id="subsequence-select"></div>
       <button id="start">Start</button>
