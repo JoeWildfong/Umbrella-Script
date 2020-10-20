@@ -1,28 +1,10 @@
 !function() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js', { scope: '' }).then(function(reg) {
-
-      if(reg.installing) {
-        console.log('Service worker installing');
-      } else if(reg.waiting) {
-        console.log('Service worker installed');
-      } else if(reg.active) {
-        console.log('Service worker active');
-      }
-
-    }).catch(function(error) {
-      // registration failed
-      console.log('Registration failed with ' + error);
-    });
-  } else {
-    console.log("Service worker unsupported");
-  }
   const MSPERFRAME = 1000;
   const BLANKFRAMES = 3;
   const OPENCOLOR = "green";
   const CLOSEDCOLOR = "red";
   const UNDEFINEDCOLOR = "grey";
-  const HIDEATEND = false;
+  const HIDEATEND = true;
   const currentColorDiv = document.getElementById("current-color");
   const nextColorDiv = document.getElementById("next-color");
   const thenColorDiv = document.getElementById("then-color");

@@ -1,11 +1,1 @@
-const allFrames = {
-  "joe": {
-    "sub 1": [false, true],
-    "sub 2": [false, true, true, false]
-  },
-  "test": {
-    "sub 1": [false],
-    "sub 2": [false, false, false, false, true, false, false],
-    "sub 3": [true]
-  }
-}
+const allFrames = {"R0C0": {"sequence 1": [false]}, "R0C1": {"sequence 1": [false]}, "R0C2": {"sequence 1": [false]}, "R1C0": {"sequence 1": [false]}, "R1C1": {"sequence 1": [false]}, "R1C2": {"sequence 1": [false]}, "R2C0": {"sequence 1": [false]}, "R2C1": {"sequence 1": [false]}, "R2C2": {"sequence 1": [false]}}
