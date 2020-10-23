@@ -1,3 +1,8 @@
+:root {
+  --current-radius: 40vw;
+  --other-radius: 20vw;
+}
+
 #login-box {
   position: absolute;
   left: 50%;
@@ -22,31 +27,39 @@ body.name-valid.subsequence-valid #start {
   transform: translate(-50%, -50%);
 }
 
-#current-color {
-  display: none;
+#flexbox {
+  display: flex;
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
-  z-index: -5;
+  top: 0;
+  left: 0;
+  align-items: center;
+  justify-content: space-around;
+}
+
+#current-color, #next-color, #then-color {
+  display: none;
+  position: relative;
+  border-radius: 50%;
+  border: 1px solid black;
+}
+
+.circle-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#current-color {
+  width: var(--current-radius);
+  height: var(--current-radius);
 }
 
 #next-color, #then-color {
-  display: none;
-  position: absolute;
-  bottom: 0;
-  width: 50%;
-  height: 30%;
-  border: 1px solid black;
-  text-align: center;
-}
-
-#next-color {
-  left: 0;
-}
-#then-color {
-  right: 0;
+  width: var(--other-radius);
+  height: var(--other-radius);
 }
 
 body[data-frame=last] #next-color {

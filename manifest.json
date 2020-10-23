@@ -6,6 +6,7 @@
   "start_url": "index.html",
   "background_color": "#ffffff",
   "theme_color": "#a81f28",
+  "orientation": "landscape",
   "icons": [{
     "src": "images/homescreen128.png",
     "sizes": "128x128",

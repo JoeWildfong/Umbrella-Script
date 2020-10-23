@@ -22,3 +22,9 @@ if ('serviceWorker' in navigator) {
 } else {
   console.log("Service worker unsupported");
 }
+
+try {
+  screen.orientation.lock("landscape");
+} catch (err) {
+  console.log("Screen lock not supported");
+}

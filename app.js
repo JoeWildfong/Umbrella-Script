@@ -1,10 +1,10 @@
 !function() {
-  const MSPERFRAME = 1000;
+  const MSPERFRAME = 2000;
   const BLANKFRAMES = 3;
   const OPENCOLOR = "green";
   const CLOSEDCOLOR = "red";
   const UNDEFINEDCOLOR = "grey";
-  const HIDEATEND = true;
+  const HIDEATEND = false;
   const currentColorDiv = document.getElementById("current-color");
   const nextColorDiv = document.getElementById("next-color");
   const thenColorDiv = document.getElementById("then-color");
