@@ -20,7 +20,10 @@
   let frames;
   let runInterval;
 
+  let audioCtx;
+
   function nextFrame() {
+    playSound();
     document.body.dataset.frame = "normal";
     if (currentFrame === frames.length) {
       stop();
@@ -50,7 +53,47 @@
     }
   }
 
+  const playSound = function() {
+    try {
+      window.AudioContext = 
+        window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContext;
+
+      const request = new XMLHttpRequest();
+      request.open('GET', "sound.mp3");
+      request.responseType = 'arraybuffer';
+
+      let soundBuffer;
+      function decodeSuccess(buffer) {
+        soundBuffer = buffer;
+      }
+      function decodeError(err) {
+        console.log("Decoding audio data failed");
+        throw "decode error";
+      }
+      request.onload = function() {
+        audioCtx.decodeAudioData(request.response, decodeSuccess, decodeError);
+      }
+      request.send();
+
+      return function() {
+        const source = audioCtx.createBufferSource();
+        source.buffer = soundBuffer;
+        source.connect(audioCtx.destination);
+        source.start();
+      }
+
+    } catch (err) {
+      console.log("Falling back to Audio object");
+      const sound = new Audio("sound.mp3");
+      return sound.play;
+    }
+  }();
+
   function start() {
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
     verifyName({}, true);
     if (!frames) {
       return;
@@ -133,4 +176,4 @@
     }
   }
 
-}()
+}();

@@ -6,7 +6,8 @@ STATIC_CACHE_FILES = [
   "/index.html",
   "/style.css",
   "/app.js",
-  "/sw-control.js"
+  "/sw-control.js",
+  "/sound.mp3"
 ]
 DATA_CACHE_FILES = [
   "/data.js"
