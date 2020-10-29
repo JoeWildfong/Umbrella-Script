@@ -18,20 +18,31 @@
     <meta name="apple-mobile-web-app-title" content="Umbrella Script">
     <link rel="apple-touch-icon" href="/images/homepage152.png">
   </head>
-  <body>
-    <div id='flexbox'>
-      <div id="current-color"></div>
-      <div id="next-color"><span class='circle-text'>Next</span></div>
-      <div id="then-color"><span class='circle-text'>Then</span></div>
-    </div>
+  <body data-state="login">
     <div id="login-box">
       <span id="name-found"></span><br />
       <label for="name">Name:</label>
       <input id="name" type="text" placeholder="Enter your name" /><br />
       <div id="subsequence-select"></div>
+      <div id="time-box">
+        <label id="time-label" for="time-input">Start at:</label>
+        <input type="time" id="time-input" /><br />
+        <span id="time-left"></span>
+      </div><br />
       <button id="start">Start</button>
     </div>
-    <button id="stop">Stop</button>
+    <div id="scheduled-box">
+      <span id="time-until-start"></span>
+      <button id="cancel">Cancel</button>
+    </div>
+    <div id="running-box">
+      <div id='flexbox'>
+        <div id="current-color"></div>
+        <div id="next-color"><span class='circle-text'>Next</span></div>
+        <div id="then-color"><span class='circle-text'>Then</span></div>
+      </div>
+      <button id="stop">Stop</button>
+    </div>
     <script src="data.js"></script>
     <script src="app.js"></script>
   </body>

@@ -1,5 +1,5 @@
 STATIC_CACHE_NAME = "static-v2";
-DATA_CACHE_NAME = "data-v2";
+DATA_CACHE_NAME = "data-v1";
 
 STATIC_CACHE_FILES = [
   "/",

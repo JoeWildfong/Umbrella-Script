@@ -2,7 +2,7 @@
   "name": "Umbrella Script",
   "short_name": "Umbrella",
   "description": "Displays individual scripts for an umbrella filming project in real time.",
-  "display": "standalone",
+  "display": "fullscreen",
   "start_url": "index.html",
   "background_color": "#ffffff",
   "theme_color": "#a81f28",
