@@ -17,7 +17,7 @@ for (key in allFrames) {
   const OPENCOLOR = "green";
   const CLOSEDCOLOR = "red";
   const UNDEFINEDCOLOR = "grey";
-  const HIDEATEND = false;
+  const HIDEATEND = true;
   const currentColorDiv = document.getElementById("current-color");
   const nextColorDiv = document.getElementById("next-color");
   const thenColorDiv = document.getElementById("then-color");
@@ -30,6 +30,9 @@ for (key in allFrames) {
   const timeLeft = document.getElementById("time-left");
   const timeUntilStart = document.getElementById("time-until-start");
   const cancelButton = document.getElementById("cancel");
+  const gainInput = document.getElementById("gain-input");
+  const gainView = document.getElementById("gain-view");
+  const gainReset = document.getElementById("gain-reset");
 
   let currentFrame = 0;
   let name;
@@ -44,6 +47,7 @@ for (key in allFrames) {
   let startTime;
 
   let audioCtx;
+  let gainNode;
 
   function nextFrame() {
     playSound();
@@ -81,6 +85,8 @@ for (key in allFrames) {
       window.AudioContext = 
         window.AudioContext || window.webkitAudioContext;
       audioCtx = new AudioContext;
+      gainNode = audioCtx.createGain();
+      gainNode.connect(audioCtx.destination);
 
       const request = new XMLHttpRequest();
       request.open('GET', "sound.mp3");
@@ -102,7 +108,7 @@ for (key in allFrames) {
       return function() {
         const source = audioCtx.createBufferSource();
         source.buffer = soundBuffer;
-        source.connect(audioCtx.destination);
+        source.connect(gainNode);
         source.start();
       }
 
@@ -119,6 +125,18 @@ for (key in allFrames) {
     }
   }
   nameEntry.addEventListener("focus", resumeAudioContext);
+
+  function adjustGain() {
+    gainNode.gain.value = gainInput.value;
+    gainView.innerHTML = gainInput.value;
+  }
+  gainInput.addEventListener("input", adjustGain);
+
+  function resetGain() {
+    gainInput.value = 1;
+    adjustGain();
+  }
+  gainReset.addEventListener("click", resetGain);
 
   function start() {
     verifyName({}, true);

@@ -3,6 +3,17 @@
   --other-radius: min(20vw, 80vh);
 }
 
+#gain-box {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+#gain-box * {
+  vertical-align: middle;
+}
+
 #login-box {
   position: absolute;
   left: 50%;
@@ -30,7 +41,7 @@ body.name-valid.subsequence-valid.time-valid #start {
 }
 
 #time-until-start {
-  font-size: 10vw;
+  font-size: 8vw;
   position: absolute;
   top: 50%;
   left: 0;
@@ -89,11 +100,11 @@ body.name-valid.subsequence-valid.time-valid #start {
 }
 
 body[data-frame=last] #next-color {
-  display: none !important;
+  visibility: hidden;
 }
 
 body:not([data-frame=normal]) #then-color {
-  display: none !important;
+  visibility: hidden;
 }
 
 #login-box, #scheduled-box, #running-box {

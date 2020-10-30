@@ -1,4 +1,4 @@
-STATIC_CACHE_NAME = "static-v2";
+STATIC_CACHE_NAME = "static-v1";
 DATA_CACHE_NAME = "data-v1";
 
 STATIC_CACHE_FILES = [

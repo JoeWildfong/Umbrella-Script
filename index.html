@@ -19,6 +19,12 @@
     <link rel="apple-touch-icon" href="/images/homepage152.png">
   </head>
   <body data-state="login">
+    <div id="gain-box">
+      <label for="gain-input">Volume (1 is normal):</label>
+      <input id="gain-input" type="range" min="0.25" max="50" value="1" step="0.25" />
+      <span id="gain-view">1</span>
+      <button id="gain-reset">Reset</button>
+    </div>
     <div id="login-box">
       <span id="name-found"></span><br />
       <label for="name">Name:</label>
