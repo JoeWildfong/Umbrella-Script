@@ -40,8 +40,6 @@ for (key in allFrames) {
   let frames;
   let runInterval;
 
-  let countdowns = [];
-  let nextCountdownId = 0;
   let countdownId;
 
   let startTime;
@@ -153,18 +151,15 @@ for (key in allFrames) {
   }
 
   function scheduledStart() {
-    //cancelCountdown(inputBoxCountdownId);
     document.body.dataset.state = "scheduled";
-    //startCountdownId = startCountdown(startTime, timeUntilStart, start, "Starting in %% seconds");
-    getCountdown(countdownId).changeTarget(timeUntilStart, start, "Starting in %% seconds");
+    Countdown.get(countdownId).changeTarget(timeUntilStart, start, "Starting in %% seconds");
   }
   startButton.addEventListener("click", scheduledStart);
 
   function cancel() {
-    //cancelCountdown(startCountdownId);
     document.body.dataset.state = "login";
     try {
-      getCountdown(countdownId).changeTarget(timeLeft, checkTime, "(in %% seconds)");
+      Countdown.get(countdownId).changeTarget(timeLeft, checkTime, "(in %% seconds)");
     } catch(err) {
       checkTime();
     }
@@ -174,6 +169,7 @@ for (key in allFrames) {
   function stop() {
     document.body.dataset.state = "login";
     clearInterval(runInterval);
+    checkTime();
   }
   stopButton.addEventListener("click", stop);
 
@@ -243,7 +239,7 @@ for (key in allFrames) {
   }
 
   function checkTime() {
-    cancelCountdown(countdownId);
+    Countdown.cancel(countdownId);
     let valid = false;
     let [hours, minutes] = timeInput.value.split(":");
     if (minutes === undefined || hours === undefined) {
@@ -274,7 +270,7 @@ for (key in allFrames) {
 
     if (valid) {
       document.body.classList.add("time-valid");
-      countdownId = startCountdown(startTime, timeLeft, checkTime, "(in %% seconds)")
+      countdownId = new Countdown(startTime, timeLeft, checkTime, "(in %% seconds)").id;
     } else {
       document.body.classList.remove("time-valid");
     }
@@ -282,14 +278,51 @@ for (key in allFrames) {
   timeInput.addEventListener("input", checkTime);
 
   class Countdown {
+    static list = [];
+    static nextId = 0;
+    static get(id) {
+      for (let i in Countdown.list) {
+        if (Countdown.list[i].id === id) {
+          return Countdown.list[i];
+        }
+      }
+    }
+    static cancel(id) {
+      for (let i in Countdown.list) {
+        if (Countdown.list[i].id === id) {
+          Countdown.list[i].canceled = true;
+          Countdown.list[i].target.innerHTML = "";
+          Countdown.list.splice(i, 1);
+        }
+      }
+    }
     constructor(endTime, el, cb=null, str="%% seconds") {
-      this.id = nextCountdownId;
-      nextCountdownId++;
+      if (endTime <= new Date()) {
+        cb();
+        return null;
+      }
+      this.id = Countdown.nextId;
+      Countdown.nextId++;
+      Countdown.list.push(this);
       this.endTime = endTime;
       this.target = el;
       this.cb = cb || function() {};
       this.str = str;
       this.canceled = false;
+      this.start();
+    }
+    start() {
+      let now = new Date();
+      this.secsLeft = Math.ceil((this.endTime - now) / 1000);
+      this.update();
+      if (this.endTime - now < 1000) {
+        this.startLast();
+      } else {
+        let nextSec = new Date();
+        nextSec.setSeconds(nextSec.getSeconds() + 1);
+        nextSec.setMilliseconds(0);
+        setTimeout(() => this.startNext(), nextSec - new Date());
+      }
     }
     startNext() {
       if (this.canceled) {
@@ -298,7 +331,7 @@ for (key in allFrames) {
       }
       let destTime = new Date();
       this.secsLeft = Math.round((this.endTime - destTime) / 1000);
-      this.print();
+      this.update();
       destTime.setSeconds(destTime.getSeconds() + 1);
       destTime.setMilliseconds(0);
       if (this.endTime - destTime > 500) {
@@ -309,36 +342,11 @@ for (key in allFrames) {
     }
     startLast() {
       if (this.canceled) {
-        this.target.innerHTML = "";
-        return;
+        this.end()
       }
-      setTimeout(() => {if (!this.canceled) {this.cb()}}, this.endTime - new Date());
-      /*let curTime = new Date();
-      if (endTime - curTime > 500) {
-        setTimeout(() => this.startLast(), endTime - 100 - new Date());
-        return;
-      }
-      if (endTime - curTime > 50) {
-        setTimeout(() => this.startLast(), endTime - 30 - new Date());
-        return;
-      }
-      while (true) {
-        if (new Date() >= endTime) {
-          this.cb();
-          cancelCountdown(this.id);
-          return;
-        }
-      }*/
+      setTimeout(() => {this.end()}, this.endTime - new Date());
     }
-    /*rapidCheck() {
-      while (true) {
-        if (new Date() >= this.endTime) {
-          this.cb();
-          return;
-        }
-      }
-    }*/
-    print() {
+    update() {
       this.target.innerHTML = this.str.replace(/%%/g, this.secsLeft);
     }
     changeTarget(newEl, newCb=null, newStr=null) {
@@ -350,51 +358,14 @@ for (key in allFrames) {
       if (newStr !== null) {
         this.str = newStr;
       }
-      this.print();
+      this.update();
     }
-  }
-
-  function startCountdown(endTime, el, cb=null, str="%% seconds") {
-    if (endTime < new Date()) {
-      cb();
-    }
-    let countdown = new Countdown(endTime, el, cb, str);
-    countdowns.push(countdown);
-    if (endTime - new Date() < 1000) {
-      countdown.startLast();
-      return;
-    }
-    let wait = new Date();
-    wait.setSeconds(wait.getSeconds() + 1);
-    wait.setMilliseconds(0);
-    setTimeout(() => countdown.startNext(), wait - new Date());
-    return countdown.id;
-  }
-
-  function cancelCountdown(id) {
-    for (let i in countdowns) {
-      if (countdowns[i].id === id) {
-        countdowns[i].canceled = true;
-        countdowns[i].target.innerHTML = "";
-        countdowns.splice(i, 1);
+    end() {
+      if (!this.canceled) {
+        this.cb();
       }
+      Countdown.cancel(this.id);
     }
   }
-
-  function getCountdown(id) {
-    for (let i in countdowns) {
-      if (countdowns[i].id === id) {
-        return countdowns[i];
-      }
-    }
-  }
-
-  /*let endTime = new Date();
-  endTime.setMinutes(endTime.getMinutes() + 1);
-  endTime.setSeconds(0);
-  endTime.setMilliseconds(0);
-  let cb = function() {console.log(+new Date() - endTime)}
-  startCountdown(endTime, nameFound, cb);
-  */
 
 }();
