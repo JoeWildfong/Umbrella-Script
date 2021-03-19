@@ -1,5 +1,5 @@
-STATIC_CACHE_NAME = "static-v1";
-DATA_CACHE_NAME = "data-v1";
+STATIC_CACHE_NAME = "static-fixedwakelock1";
+DATA_CACHE_NAME = "data-pleasework2";
 
 STATIC_CACHE_FILES = [
   "/",
@@ -7,10 +7,18 @@ STATIC_CACHE_FILES = [
   "/style.css",
   "/app.js",
   "/sw-control.js",
-  "/sound.mp3"
+  "/timesync.js",
+  "/countdown.js",
+  "/nosleep-min.js",
+  "/sound.mp3",
+  "/Roboto-Regular.ttf"
 ]
 DATA_CACHE_FILES = [
   "/data.js"
+]
+
+NO_CACHE = [
+  "https://catherapyservices.ca/timesync/"
 ]
 
 self.addEventListener('install', event => {
@@ -42,31 +50,38 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      // caches.match() always resolves
-      // but in case of success response will have value
-      if (response !== undefined) {
-        return response;
-      } else {
-        return fetch(event.request).then(response => {
-          // response may be used only once
-          // we need to save clone to put one copy in cache
-          // and serve second one
-          let responseClone = response.clone();
-          
-          let cacheToStore = STATIC_CACHE_NAME;
-          if (event.request in DATA_CACHE_FILES) {
-            cacheToStore = DATA_CACHE_NAME;
-          }
-          caches.open(cacheToStore).then(cache => {
-            cache.put(event.request, responseClone);
-          });
+  if (NO_CACHE.includes(event.request.url)) {
+    event.respondWith(
+      fetch(event.request, {cache: "no-store"}).then(response => {return response})
+    );
+  }
+  else {
+    event.respondWith(
+      caches.match(event.request).then(response => {
+        // caches.match() always resolves
+        // but in case of success response will have value
+        if (response !== undefined) {
           return response;
-        }).catch(() => {
-          caches.match('data.js');
-        });
-      }
-    })
-  );
+        } else {
+          return fetch(event.request).then(response => {
+            // response may be used only once
+            // we need to save clone to put one copy in cache
+            // and serve second one
+            let responseClone = response.clone();
+            
+            let cacheToStore = STATIC_CACHE_NAME;
+            if (event.request in DATA_CACHE_FILES) {
+              cacheToStore = DATA_CACHE_NAME;
+            }
+            caches.open(cacheToStore).then(cache => {
+              cache.put(event.request, responseClone);
+            });
+            return response;
+          }).catch(() => {
+            caches.match('data.js');
+          });
+        }
+      })
+    );
+  }
 });

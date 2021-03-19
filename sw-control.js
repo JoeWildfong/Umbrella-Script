@@ -5,7 +5,7 @@ navigator.serviceWorker.addEventListener('controllerchange', () => {
   location.reload();
 });
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(function(reg) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
 
     if(reg.installing) {
       console.log('Service worker installing');
@@ -15,7 +15,7 @@ if ('serviceWorker' in navigator) {
       console.log('Service worker active');
     }
 
-  }).catch(function(error) {
+  }).catch(error => {
     // registration failed
     console.log('Registration failed with ' + error);
   });
@@ -23,8 +23,15 @@ if ('serviceWorker' in navigator) {
   console.log("Service worker unsupported");
 }
 
-try {
-  screen.orientation.lock("landscape");
-} catch (err) {
-  console.log("Screen lock not supported");
+if (screen && screen.orientation) {
+  screen.orientation.lock("landscape").catch(
+    err => console.log("Screen lock failed")
+  );
+} else {
+  screen.lockOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
+  if (screen.lockOrientation) {
+    screen.lockOrientation("landscape");
+  } else {
+    console.log("No screen lock method found");
+  }
 }

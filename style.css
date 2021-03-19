@@ -1,6 +1,34 @@
 :root {
   --current-radius: min(40vw, 80vh);
   --other-radius: min(20vw, 80vh);
+  /* red-green colour scheme
+  --transition-open-color: hsl(100, 70%, 70%);
+  --open-color: hsl(100, 70%, 65%);
+  --transition-closed-color: hsl(0, 70%, 50%);
+  --closed-color: hsl(0, 70%, 45%);*/
+  --transition-open-color: hsl(50, 85%, 65%);
+  --open-color: hsl(50, 85%, 60%);
+  --transition-closed-color: hsl(0, 0%, 10%);
+  --closed-color: hsl(0, 0%, 0%);
+  --transition-undefined-color: hsl(0, 0%, 55%);
+  --undefined-color: hsl(0, 0%, 50%);
+  --color-effect-duration: 0.3s;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url(Roboto-Regular.ttf);
+}
+
+* {
+  font-family: "Roboto", sans-serif;
+}
+
+#delay-box {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  text-align: center;
 }
 
 #gain-box {
@@ -14,34 +42,54 @@
   vertical-align: middle;
 }
 
+#name-box {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  text-align: center;
+}
+
 #login-box {
   position: absolute;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  top: 10%;
+  transform: translate(-50%, 0);
   text-align: center;
+}
+
+#subsequence-box {
+  display: none;
+  margin-top: 10px;
+}
+
+body.name-valid #subsequence-box {
+  display: block;
+}
+
+#subsequence-select {
+  text-align: left;
 }
 
 #time-box {
   display: none;
+  margin-top: 10px;
 }
 
 body.name-valid.subsequence-valid #time-box {
-  display: initial;
+  display: block;
 }
 
 #start {
+  margin-top: 5px;
   display: none;
-  height: 30%;
-  width: 30%;
 }
 
 body.name-valid.subsequence-valid.time-valid #start {
-  display: initial;
+  display: unset;
 }
 
 #time-until-start {
-  font-size: 8vw;
+  font-size: 20vw;
   position: absolute;
   top: 50%;
   left: 0;
@@ -49,6 +97,11 @@ body.name-valid.subsequence-valid.time-valid #start {
   display: inline-block;
   width: 100%;
   text-align: center;
+}
+
+.fade-out {
+  transition: opacity 0.5s;
+  opacity: 0;
 }
 
 #cancel {
@@ -80,6 +133,58 @@ body.name-valid.subsequence-valid.time-valid #start {
   position: relative;
   border-radius: 50%;
   border: 1px solid black;
+  animation-duration: var(--color-effect-duration);
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+@keyframes open-anim {
+  from {
+    background-color: var(--transition-open-color);
+  }
+  to {
+    background-color: var(--open-color);
+  }
+}
+
+@keyframes closed-anim {
+  from {
+    background-color: var(--transition-closed-color);
+  }
+  to {
+    background-color: var(--closed-color);
+  }
+}
+
+@keyframes undefined-anim {
+  from {
+    background-color: var(--transition-undefined-color);
+  }
+  to {
+    background-color: var(--undefined-color);
+  }
+}
+
+.open {
+  animation-name: open-anim;
+}
+
+.closed {
+  animation-name: closed-anim;
+}
+
+.undefined {
+  animation-name: undefined-anim;
+}
+
+#current-text {
+  font-size: calc(var(--current-radius) / 4);
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.closed #current-text {
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .circle-text {
@@ -107,18 +212,14 @@ body:not([data-frame=normal]) #then-color {
   visibility: hidden;
 }
 
-#login-box, #scheduled-box, #running-box {
+body[data-state=login] .no-login {
   display: none;
 }
 
-body[data-state=login] #login-box {
-  display: initial;
+body[data-state=scheduled] .no-schedule {
+  display: none;
 }
 
-body[data-state=scheduled] #scheduled-box {
-  display: initial;
-}
-
-body[data-state=running] #running-box {
-  display: initial;
+body[data-state=running] .no-run {
+  display: none;
 }

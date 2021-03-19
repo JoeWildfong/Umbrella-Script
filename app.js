@@ -14,11 +14,12 @@ for (key in allFrames) {
 !function() {
   const MSPERFRAME = 2000;
   const BLANKFRAMES = 3;
-  const OPENCOLOR = "green";
-  const CLOSEDCOLOR = "red";
-  const UNDEFINEDCOLOR = "grey";
   const HIDEATEND = true;
+  const OPENTEXT = "OPEN";
+  const CLOSEDTEXT = "CLOSED";
+  const READYTEXT = "CLOSED";
   const currentColorDiv = document.getElementById("current-color");
+  const currentText = document.getElementById("current-text");
   const nextColorDiv = document.getElementById("next-color");
   const thenColorDiv = document.getElementById("then-color");
   const startButton = document.getElementById("start");
@@ -33,11 +34,17 @@ for (key in allFrames) {
   const gainInput = document.getElementById("gain-input");
   const gainView = document.getElementById("gain-view");
   const gainReset = document.getElementById("gain-reset");
+  const delayText = document.getElementById("delay-text");
+  const delayErr = document.getElementById("delay-err");
+  const delayFind = document.getElementById("find-delay");
+  const pixelName = document.getElementById("pixel-name");
+  const subNameSpan = document.getElementById("sub-name");
 
   let currentFrame = 0;
   let name;
   let seqs;
   let frames;
+  let subName;
   let runInterval;
 
   let countdownId;
@@ -47,7 +54,47 @@ for (key in allFrames) {
   let audioCtx;
   let gainNode;
 
+  let wakeLock = async function() {
+    if ('wakeLock' in navigator) {
+      return {
+        type: "API",
+        lock: async function() {
+          this.lockObj = navigator.wakeLock.request();
+          return this.lockObj;
+        },
+        release: async function() {
+          return this.lock.release();
+        }
+      }
+    } else {
+      return getNoSleep().then(
+        (obj) => {
+          return obj;
+        },
+        (err) => {
+          console.log("NoSleep failed");
+          return {
+            type: "none",
+            lock: function() {},
+            release: function() {}
+          }
+        }
+      );
+    }
+  }().then((obj) => console.log("wake lock: " + obj.type));
+
+  async function getNoSleep() {
+    await import("nosleep-min.js");
+    return {
+      type: "NoSleep",
+      lockObj: new NoSleep(),
+      lock: this.lockObj.enable,
+      release: this.lockObj.disable
+    }
+  }
+
   function nextFrame() {
+    console.log("frame " + currentFrame + ", delay " + (timeSync.now() - startTime - currentFrame*MSPERFRAME));
     playSound();
     document.body.dataset.frame = "normal";
     if (currentFrame === frames.length) {
@@ -63,18 +110,32 @@ for (key in allFrames) {
       }
     }
     setColor(frames[currentFrame], currentColorDiv);
+    setText(frames[currentFrame], currentText);
     setColor(frames[currentFrame + 1], nextColorDiv);
     setColor(frames[currentFrame + 2], thenColorDiv);
     currentFrame++;
   }
 
   function setColor(val, el) {
+    let newClass = "undefined";
+    el.classList.remove("open");
+    el.classList.remove("closed");
+    el.classList.remove("undefined");
     if (val === true) {
-      el.style.backgroundColor = OPENCOLOR;
+      newClass = "open";
     } else if (val === false) {
-      el.style.backgroundColor = CLOSEDCOLOR;
+      newClass = "closed"
+    }
+    setTimeout(() => el.classList.add(newClass), 0);
+  }
+
+  function setText(val, el) {
+    if (val === true) {
+      el.innerHTML = OPENTEXT;
+    } else if (val === false) {
+      el.innerHTML = CLOSEDTEXT;
     } else {
-      el.style.backgroundColor = UNDEFINEDCOLOR;
+      el.innerHTML = READYTEXT;
     }
   }
 
@@ -83,6 +144,7 @@ for (key in allFrames) {
       window.AudioContext = 
         window.AudioContext || window.webkitAudioContext;
       audioCtx = new AudioContext;
+      audioCtx.createGain = audioCtx.createGain || audioCtx.createGainNode;
       gainNode = audioCtx.createGain();
       gainNode.connect(audioCtx.destination);
 
@@ -111,6 +173,7 @@ for (key in allFrames) {
       }
 
     } catch (err) {
+      nameFound.innerHTML = err.name + ": " + err.message;
       console.log("Falling back to Audio object");
       const sound = new Audio("sound.mp3");
       return sound.play;
@@ -143,16 +206,25 @@ for (key in allFrames) {
     }
     currentFrame = 0;
     document.body.dataset.state = "running";
-    console.log("sequence started. delay: " + (+new Date() - startTime));
-    startTime = undefined;
+    console.log("sequence started. delay: " + (+timeSync.now() - startTime));
     timeInput.value = "";
     nextFrame();
     runInterval = setInterval(nextFrame, MSPERFRAME);
+    console.log("wake lock set");
+  }
+
+  function fadeOut(el) {
+    if (el.innerHTML === "1") {
+      el.innerHTML = "READY";
+    }
+    el.classList.remove("fade-out");
+    setTimeout(() => el.classList.add("fade-out"), 250);
   }
 
   function scheduledStart() {
     document.body.dataset.state = "scheduled";
-    Countdown.get(countdownId).changeTarget(timeUntilStart, start, "Starting in %% seconds");
+    Countdown.get(countdownId).changeTarget(timeUntilStart, start, "%%", fadeOut);
+    wakeLock.lock();
   }
   startButton.addEventListener("click", scheduledStart);
 
@@ -163,13 +235,19 @@ for (key in allFrames) {
     } catch(err) {
       checkTime();
     }
+    timeUntilStart.classList.remove("fade-out");
   }
   cancelButton.addEventListener("click", cancel);
 
   function stop() {
     document.body.dataset.state = "login";
     clearInterval(runInterval);
+    document.getElementById(subName.id).checked = true;
+    checkSubsequence();
+    startTime = undefined;
     checkTime();
+    wakeLock.release();
+    console.log("wake lock released");
   }
   stopButton.addEventListener("click", stop);
 
@@ -181,6 +259,7 @@ for (key in allFrames) {
       nameFound.innerHTML = "Name found!";
       document.body.classList.add("name-valid");
       addRadioButtons();
+      pixelName.innerHTML = name;
       return true;
     } else {
       if (promptInvalid) {
@@ -224,13 +303,14 @@ for (key in allFrames) {
   }
 
   function checkSubsequence() {
-    let subName = subsequenceSelect.querySelector("[name=subsequence]:checked");
+    subName = subsequenceSelect.querySelector("[name=subsequence]:checked");
     if (subName === null) {
       return;
     }
     else if (seqs[subName.value]) {
       frames = Array(BLANKFRAMES).fill(undefined).concat(seqs[subName.value]);
       document.body.classList.add("subsequence-valid");
+      subNameSpan.innerHTML = subName.value;
     }
     else {
       nameFound.innerHTML = "Something went wrong...";
@@ -277,95 +357,28 @@ for (key in allFrames) {
   }
   timeInput.addEventListener("input", checkTime);
 
-  class Countdown {
-    static list = [];
-    static nextId = 0;
-    static get(id) {
-      for (let i in Countdown.list) {
-        if (Countdown.list[i].id === id) {
-          return Countdown.list[i];
+  function calcDelay() {
+    delayErr.innerHTML = "Calculating...";
+    timeSync.getDelay().then(val => {
+      if (val === "no internet") {
+        let stored = localStorage.getItem("offset");
+        if (stored === null) {
+          delayText.innerHTML = "Offset: unknown";
+          delayErr.innerHTML = "No internet or stored value";
+        } else {
+          timeSync.delay = stored;
+          delayText.innerHTML = "Offset: " + stored + "ms";
+          delayErr = "No internet, using stored value";
         }
-      }
-    }
-    static cancel(id) {
-      for (let i in Countdown.list) {
-        if (Countdown.list[i].id === id) {
-          Countdown.list[i].canceled = true;
-          Countdown.list[i].target.innerHTML = "";
-          Countdown.list.splice(i, 1);
-        }
-      }
-    }
-    constructor(endTime, el, cb=null, str="%% seconds") {
-      if (endTime <= new Date()) {
-        cb();
-        return null;
-      }
-      this.id = Countdown.nextId;
-      Countdown.nextId++;
-      Countdown.list.push(this);
-      this.endTime = endTime;
-      this.target = el;
-      this.cb = cb || function() {};
-      this.str = str;
-      this.canceled = false;
-      this.start();
-    }
-    start() {
-      let now = new Date();
-      this.secsLeft = Math.ceil((this.endTime - now) / 1000);
-      this.update();
-      if (this.endTime - now < 1000) {
-        this.startLast();
       } else {
-        let nextSec = new Date();
-        nextSec.setSeconds(nextSec.getSeconds() + 1);
-        nextSec.setMilliseconds(0);
-        setTimeout(() => this.startNext(), nextSec - new Date());
+        localStorage.setItem("offset", val);
+        delayText.innerHTML = "Offset: " + val + "ms";
+        delayErr.innerHTML = "";
       }
-    }
-    startNext() {
-      if (this.canceled) {
-        this.target.innerHTML = "";
-        return;
-      }
-      let destTime = new Date();
-      this.secsLeft = Math.round((this.endTime - destTime) / 1000);
-      this.update();
-      destTime.setSeconds(destTime.getSeconds() + 1);
-      destTime.setMilliseconds(0);
-      if (this.endTime - destTime > 500) {
-        setTimeout(() => this.startNext(), destTime - new Date());
-      } else {
-        setTimeout(() => this.startLast(), destTime - new Date());
-      }
-    }
-    startLast() {
-      if (this.canceled) {
-        this.end()
-      }
-      setTimeout(() => {this.end()}, this.endTime - new Date());
-    }
-    update() {
-      this.target.innerHTML = this.str.replace(/%%/g, this.secsLeft);
-    }
-    changeTarget(newEl, newCb=null, newStr=null) {
-      this.target.innerHTML = "";
-      this.target = newEl;
-      if (newCb) {
-        this.cb = newCb;
-      }
-      if (newStr !== null) {
-        this.str = newStr;
-      }
-      this.update();
-    }
-    end() {
-      if (!this.canceled) {
-        this.cb();
-      }
-      Countdown.cancel(this.id);
-    }
+    });
   }
+  delayFind.addEventListener("click", calcDelay);
+
+  calcDelay();
 
 }();

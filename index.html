@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8">
     <script src='sw-control.js'></script>
+    <script src='nosleep-min.js' type="module"></script>
     
-    <meta charset="utf-8">
+    <link rel="shortcut icon" href="favicon.ico">
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An app to display scripts for umbrella filming projects.">
     <meta name="theme-color" content="#a81f28">
@@ -15,41 +17,57 @@
     <!-- iOS tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Umbrella Script">
+    <meta name="apple-mobile-web-app-title" content="Umbrella">
     <link rel="apple-touch-icon" href="/images/homepage152.png">
   </head>
   <body data-state="login">
+    <div id="delay-box" class="no-schedule no-run">
+      <span id="delay-text">Offset: unknown</span><br />
+      <button id="find-delay">Calculate time offset</button><br/>
+      <span id="delay-err"></span>
+    </div>
     <div id="gain-box">
       <label for="gain-input">Volume (1 is normal):</label>
       <input id="gain-input" type="range" min="0.25" max="50" value="1" step="0.25" />
       <span id="gain-view">1</span>
-      <button id="gain-reset">Reset</button>
+      <button id="gain-reset">Reset Volume</button>
     </div>
-    <div id="login-box">
+    <div id="name-box" class="no-login">
+      <span id="pixel-name"></span><br />
+      <span id="sub-name"></span>
+    </div>
+    <div id="login-box" class="no-schedule no-run">
       <span id="name-found"></span><br />
-      <label for="name">Name:</label>
+      <label for="name">Enter your name:</label>
       <input id="name" type="text" placeholder="Enter your name" /><br />
-      <div id="subsequence-select"></div>
+      <div id="subsequence-box">
+        <span id="subsequence-select-text">Pick a sequence:</span><br />
+        <div id="subsequence-select"></div>
+      </div>
       <div id="time-box">
-        <label id="time-label" for="time-input">Start at:</label>
+        <label id="time-label" for="time-input">Set a start time:</label>
         <input type="time" id="time-input" /><br />
         <span id="time-left"></span>
-      </div><br />
-      <button id="start">Start</button>
+      </div>
+      <button id="start">Begin Countdown</button>
     </div>
-    <div id="scheduled-box">
+    <div id="scheduled-box" class="no-login no-run">
       <span id="time-until-start"></span>
       <button id="cancel">Cancel</button>
     </div>
-    <div id="running-box">
+    <div id="running-box" class="no-login no-schedule">
       <div id='flexbox'>
-        <div id="current-color"></div>
-        <div id="next-color"><span class='circle-text'>Next</span></div>
-        <div id="then-color"><span class='circle-text'>Then</span></div>
+        <div id="current-color"><span id='current-text' class='circle-text'></span></div>
+        <div class="arrow">&lt;</div>
+        <div id="next-color"><span class='circle-text'></span></div>
+        <div class="arrow">&lt;</div>
+        <div id="then-color"><span class='circle-text'></span></div>
       </div>
       <button id="stop">Stop</button>
     </div>
     <script src="data.js"></script>
+    <script src="timesync.js"></script>
+    <script src="countdown.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
