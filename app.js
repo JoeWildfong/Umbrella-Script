@@ -54,44 +54,29 @@ for (key in allFrames) {
   let audioCtx;
   let gainNode;
 
-  let wakeLock = async function() {
+  let wakeLock = function() {
     if ('wakeLock' in navigator) {
       return {
         type: "API",
         lock: async function() {
-          this.lockObj = navigator.wakeLock.request();
+          this.lockObj = await navigator.wakeLock.request();
           return this.lockObj;
         },
         release: async function() {
-          return this.lock.release();
+          return this.lockObj.release();
         }
       }
     } else {
-      return getNoSleep().then(
-        (obj) => {
-          return obj;
-        },
-        (err) => {
-          console.log("NoSleep failed");
-          return {
-            type: "none",
-            lock: function() {},
-            release: function() {}
-          }
-        }
-      );
+      var noSleep = new NoSleep();
+      return {
+        type: "NoSleep",
+        lockObj: noSleep,
+        lock: noSleep.enable,
+        release: noSleep.disable
+      }
     }
-  }().then((obj) => console.log("wake lock: " + obj.type));
-
-  async function getNoSleep() {
-    await import("nosleep-min.js");
-    return {
-      type: "NoSleep",
-      lockObj: new NoSleep(),
-      lock: this.lockObj.enable,
-      release: this.lockObj.disable
-    }
-  }
+  }();
+  console.log("wake lock: " + wakeLock.type);
 
   function nextFrame() {
     console.log("frame " + currentFrame + ", delay " + (timeSync.now() - startTime - currentFrame*MSPERFRAME));
@@ -210,7 +195,6 @@ for (key in allFrames) {
     timeInput.value = "";
     nextFrame();
     runInterval = setInterval(nextFrame, MSPERFRAME);
-    console.log("wake lock set");
   }
 
   function fadeOut(el) {
@@ -236,6 +220,7 @@ for (key in allFrames) {
       checkTime();
     }
     timeUntilStart.classList.remove("fade-out");
+    wakeLock.release();
   }
   cancelButton.addEventListener("click", cancel);
 

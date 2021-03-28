@@ -1,5 +1,5 @@
-STATIC_CACHE_NAME = "static-fixedwakelock1";
-DATA_CACHE_NAME = "data-pleasework2";
+STATIC_CACHE_NAME = "static-nosleepfix";
+DATA_CACHE_NAME = "data-pleasework3";
 
 STATIC_CACHE_FILES = [
   "/",

@@ -81,6 +81,9 @@ body.name-valid.subsequence-valid #time-box {
 
 #start {
   margin-top: 5px;
+  font-weight: bold;
+  font-size: 12pt;
+  padding: 5px 10px;
   display: none;
 }
 
